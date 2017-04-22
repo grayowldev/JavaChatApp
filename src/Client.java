@@ -16,46 +16,46 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-/**
- * Created by kwasi on 4/21/2017.
- */
-public class Client extends Application {
 
+public class Client extends Application {
+    //Port number used
     int portNo = 5202;
+
+    // Temporal I/O assignment
     DataInputStream dataIn = null;
     DataOutputStream dataOut = null;
     //String serverMessage = "";
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        // GUI setup
         TextArea inputArea = new TextArea();
         TextArea outputArea = new TextArea();
         outputArea.setEditable(false);
-        outputArea.setFont(Font.font(30));
         outputArea.setPromptText("Start Here");
 
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(outputArea);
         borderPane.setBottom(inputArea);
 
+        //  Show Application
         Scene scene = new Scene(borderPane, 600, 500);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Client");
         primaryStage.show();
 
 
-
+        // New thread to handle network
         new Thread(()->{
             try {
+                //socket creation and I/O reassignment
                 Socket socket = new Socket("LocalHost",portNo);
                 dataIn = new DataInputStream(socket.getInputStream());
                 dataOut = new DataOutputStream(socket.getOutputStream());
 
+                // thread to handle in coming network calls
                 new Thread(() ->{
                     try{
-                        //Socket socket = new Socket("localHost",portNo);
-                        //dataIn = new DataInputStream(socket.getInputStream());
-                        //dataOut = new DataOutputStream(socket.getOutputStream());
                         while (true){
                             String serverMessage = dataIn.readUTF();
 
@@ -68,8 +68,10 @@ public class Client extends Application {
                     catch (IOException e){
                         System.err.println(e);
                     }
-            }).start();
+                //  Start 2nd thread
+                }).start();
 
+                // enter key to send message
                 inputArea.setOnKeyPressed(new EventHandler<KeyEvent>() {
                     @Override
                     public void handle(KeyEvent event) {
@@ -77,6 +79,7 @@ public class Client extends Application {
                             sendMessage();
                         }
                     }
+                    //  send message function
                     public void sendMessage(){
                         try{
                             String message = "Client: " + inputArea.getText().toString().trim();
@@ -100,12 +103,11 @@ public class Client extends Application {
                 outputArea.appendText(e.toString() + '\n');
             }
 
-
+        // start 1st thread
         }).start();
-
-
     }
 
+    // Main method
     public static void main(String[] args) {
         launch(args);
     }
