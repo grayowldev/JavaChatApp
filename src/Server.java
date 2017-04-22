@@ -16,10 +16,14 @@ import java.util.Date;
 
 
 public class Server extends Application {
-
+    //Port number used
     int portNo = 5202;
+
+
     @Override
     public void start(Stage primaryStage) throws Exception {
+
+        //Gui Layout
         TextArea inputArea = new TextArea();
         TextArea outputArea = new TextArea();
         outputArea.setEditable(false);
@@ -29,10 +33,12 @@ public class Server extends Application {
         borderPane.setBottom(inputArea);
 
         Scene scene = new Scene(borderPane, 600,500);
+        // Starting Application
         primaryStage.setScene(scene);
         primaryStage.setTitle("Server");
         primaryStage.show();
 
+        //new Thread to handle network
         new Thread(() -> {
             try{
                 //Server socket creation
@@ -45,23 +51,27 @@ public class Server extends Application {
 
                 Socket socket = serverSocket.accept();
 
+                // I/O stream creation
                 DataInputStream dataIn = new DataInputStream(socket.getInputStream());
                 DataOutputStream dataOut = new DataOutputStream(socket.getOutputStream());
 
                 String message = "";
 
+                // Server communications
                 while (!message.equals("quit")){
                     //Saving client input
                     String clientMessage = dataIn.readUTF();
-                    //message = "Server: " + inputArea.getText().toString().trim();
+                    // Sending a message
                     dataOut.writeUTF(message);
                     dataOut.flush();
 
+                    // print message to screen
                     Platform.runLater(() -> {
                         outputArea.appendText( clientMessage +  '\n' );
                         //outputArea.appendText(message + '\n');
                     });
 
+                    // managing ENTER key execution
                     inputArea.setOnKeyPressed(new EventHandler<KeyEvent>() {
                         @Override
                         public void handle(KeyEvent event) {
@@ -69,6 +79,7 @@ public class Server extends Application {
                                 sendMessage();
                             }
                         }
+                        //  send message function
                         public void sendMessage(){
                             try{
                                 String message = "Server: " + inputArea.getText().toString().trim();
@@ -87,21 +98,17 @@ public class Server extends Application {
                         }
                     });
                 }
-
-                //socket.close();
-
             }
             catch (Exception e){
                 e.printStackTrace();
             }
+        //  start thread
         }).start();
 
     }
 
 
-
-//    class SendData implements Runnable{}
-
+    // Main function
     public static void main(String[] args) {
         launch(args);
     }
